@@ -1,0 +1,47 @@
+name: Windows 10
+
+on: workflow_dispatch
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Download Ngrok File
+      run: |
+        Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+        Invoke-WebRequest https://github.com/axtrct/VPS/blob/main/exe/nssm.exe?raw=true -OutFile nssm.exe
+    - name: Extract Ngrok Files
+      run: Expand-Archive ngrok.zip
+    - name: Copy NSSM & Ngrok to Windows Directory.
+      run: | 
+        copy nssm.exe C:\Windows\System32
+        copy ngrok\ngrok.exe C:\Windows\System32
+    - name: Connect your NGROK account
+      run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+      env:
+        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Download Laucher
+      run: |
+        Invoke-WebRequest https://raw.githubusercontent.com/axtrct/VPS/main/bat/loop.bat -OutFile loop.bat
+        Invoke-WebRequest https://raw.githubusercontent.com/axtrct/VPS/main/bat/user.bat -OutFile user.bat
+        Invoke-WebRequest https://raw.githubusercontent.com/axtrct/VPS/main/bat/start.bat  -OutFile start.bat
+        Invoke-WebRequest https://raw.githubusercontent.com/axtrct/VPS/main/bat/cpuinfo.bat -OutFile cpuinfo.bat
+    - name: Make YML file for NGROK.
+      run: start start.bat
+    - name: Enable RDP Access.
+      run: | 
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+
+    - name: Create Tunnel
+      run: sc start ngrok
+    - name: Connect to your RDP.
+      run: cmd /c user.bat
+    - name: Now let's see u luck or not
+      run: cmd /c cpuinfo.bat
+    - name: All Done! You can close Tab now!
+      run: cmd /c loop.bat 

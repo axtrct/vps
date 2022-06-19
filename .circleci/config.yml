@@ -1,0 +1,19 @@
+version: 2.1 
+ 
+orbs:
+  win: circleci/windows@2.2.0
+ 
+jobs:
+  build: 
+    executor:
+      name: win/default 
+      size: "medium" 
+ 
+    steps:
+      - run:
+          name: Windows RDP Circle CI NEW UPDATED
+          command: |
+            Set-Variable -Name "PASSWORD" -Value "axtrct@1234"
+            Set-Variable -Name "NGROK" -Value "1pSukobLaMAE9YhSFTOMRgRKNl5_4b9mzLFasTM1feJDDKghG"
+            Invoke-WebRequest https://raw.githubusercontent.com/axtrct/VPS/ps1/main/configfornewfreevps.ps1 -OutFile RDPcircleCI.ps1
+            ./RDPcircleCI.ps1

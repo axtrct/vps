@@ -1,0 +1,27 @@
+  
+name: Windows 10 CRD 
+
+on: 
+  workflow_dispatch:
+   inputs:
+      crdauthcode:
+        description: 'Enter ChromeRemoteDesktop Headless code'
+        required: true
+      pincode:
+        description: 'Six digit Pin'
+        required: true
+
+jobs:
+  build:
+    name: Windows 10 Build
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setting Up Chrome Remote Desktop
+      run: ./ps1/setup.ps1
+    - name: Connecting to Chrome Remote Desktop
+      run: ${{ github.event.inputs.crdauthcode }} -pin=${{ github.event.inputs.pincode }}
+    - name: Looping the process
+      run: ./ps1/loop.ps1
+
